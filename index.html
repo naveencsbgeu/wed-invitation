@@ -35,80 +35,72 @@
     position: relative; overflow: hidden; background: var(--blush);
   }
 
-  /* ── BOOK FLIP SCENE ── */
-  .book-scene {
-    perspective: 1400px;
-    position: relative;
-  }
-
-  /* Each page sits in the same space */
+  /* ── BOOK FLIP ── */
+  .book-scene { perspective: 1400px; position: relative; cursor: pointer; user-select: none; }
   .page {
-    display: none;
-    padding: 28px 36px 24px;
+    display: none; padding: 28px 36px 24px;
     flex-direction: column; align-items: center;
-    background: var(--blush);
-    position: relative;
-    /* flip animation */
-    transform-origin: left center;
-    backface-visibility: hidden;
+    background: var(--blush); position: relative;
+    transform-origin: left center; backface-visibility: hidden;
   }
   .page.active { display: flex; }
-
-  /* Flip-in: new page comes from right */
   @keyframes flipIn {
     0%   { opacity:0; transform: perspective(1200px) rotateY(-25deg) translateX(30px); }
     60%  { opacity:1; transform: perspective(1200px) rotateY(3deg); }
     100% { opacity:1; transform: perspective(1200px) rotateY(0deg) translateX(0); }
   }
-  /* Flip-out: old page exits to left */
   @keyframes flipOut {
     0%   { opacity:1; transform: perspective(1200px) rotateY(0deg); }
     100% { opacity:0; transform: perspective(1200px) rotateY(25deg) translateX(-30px); }
   }
   .page.flip-in  { animation: flipIn  0.65s cubic-bezier(0.4,0,0.2,1) forwards; }
   .page.flip-out { display:flex; animation: flipOut 0.65s cubic-bezier(0.4,0,0.2,1) forwards; }
+  .spine { position:absolute; left:0; top:0; width:8px; height:100%; background: linear-gradient(to right, rgba(107,31,31,0.18), transparent); pointer-events:none; z-index:10; }
 
-  /* Spine shadow during flip */
-  .spine {
-    position:absolute; left:0; top:0; width:8px; height:100%;
-    background: linear-gradient(to right, rgba(107,31,31,0.18), transparent);
-    pointer-events:none; z-index:10;
+  /* Progress bar */
+  .progress-bar { height:3px; background:rgba(107,31,31,0.12); position:relative; overflow:hidden; }
+  .progress-fill { height:100%; background: linear-gradient(to right, var(--gold), var(--maroon)); width:0%; }
+  .progress-fill.running { transition: width 10s linear; width:100%; }
+
+  /* ── PLAY/PAUSE BUTTON ── */
+  .playpause-btn {
+    position: absolute;
+    bottom: 14px;
+    right: 14px;
+    width: 36px; height: 36px;
+    background: rgba(107,31,31,0.85);
+    border: 1.5px solid var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 30;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    transition: background 0.2s, transform 0.15s;
+  }
+  .playpause-btn:hover { background: var(--maroon); transform: scale(1.1); }
+  .playpause-btn svg { width:14px; height:14px; fill:#f5d78e; }
+
+  /* Tap hint pulse — shown only first 3s */
+  .tap-hint {
+    position:absolute; bottom:58px; right:8px;
+    font-size:0.52rem; color:var(--maroon); opacity:0;
+    font-family:'Libre Baskerville',serif; letter-spacing:0.5px;
+    text-align:center; line-height:1.4; z-index:30;
+    animation: hintFade 3.5s ease forwards;
+    pointer-events:none;
+  }
+  @keyframes hintFade {
+    0%  { opacity:0; } 10% { opacity:0.7; } 80% { opacity:0.7; } 100% { opacity:0; }
   }
 
-  /* Vine borders */
+  /* Vine */
   .vine-svg { position:absolute; top:50%; width:32px; opacity:0.38; pointer-events:none; }
   .vine-l { left:5px; transform:translateY(-50%); }
   .vine-r { right:5px; transform:translateY(-50%) scaleX(-1); }
 
-  /* Progress bar */
-  .progress-bar {
-    height: 3px;
-    background: rgba(107,31,31,0.12);
-    position: relative; overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(to right, var(--gold), var(--maroon));
-    width: 0%;
-    transition: none;
-  }
-  .progress-fill.animating {
-    transition: width 10s linear;
-    width: 100%;
-  }
-
   /* Ganesh */
-  .ganesh-img {
-    width: 58px; height: 58px; object-fit:contain;
-    animation: float 3s ease-in-out infinite; margin-bottom:4px;
-  }
-  .ganesh-img-sm {
-    width: 42px; height: 42px; object-fit:contain;
-    animation: float 3s ease-in-out infinite; margin-bottom:4px;
-  }
-  @keyframes float {
-    0%,100% { transform:translateY(0); } 50% { transform:translateY(-4px); }
-  }
+  .ganesh-img    { width:58px; height:58px; object-fit:contain; animation:float 3s ease-in-out infinite; margin-bottom:4px; }
+  .ganesh-img-sm { width:42px; height:42px; object-fit:contain; animation:float 3s ease-in-out infinite; margin-bottom:4px; }
+  @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-4px);} }
 
   /* Typography */
   .divider { width:100%; text-align:center; color:var(--maroon); opacity:0.55; font-size:1rem; margin:4px 0; letter-spacing:4px; }
@@ -140,90 +132,58 @@
   .event-row:last-child { border-bottom:none; }
   .event-name { font-size:0.68rem; color:var(--maroon); flex:1; }
   .event-time { font-size:0.68rem; color:var(--maroon); font-weight:bold; text-align:right; }
-
-  /* Venue box with map link */
   .venue-box { border:2px solid var(--maroon); border-radius:3px; padding:10px 18px; text-align:center; margin:8px 0; width:100%; background:rgba(255,255,255,0.12); }
   .venue-label { font-size:0.6rem; color:var(--maroon); letter-spacing:2px; text-transform:uppercase; opacity:0.65; margin-bottom:3px; }
   .venue-name { font-family:'Libre Baskerville',serif; font-size:1.15rem; color:var(--maroon); font-weight:700; letter-spacing:1px; }
   .venue-addr { font-size:0.7rem; color:var(--maroon); opacity:0.78; margin-top:2px; }
   .map-link {
-    display: inline-flex; align-items:center; gap:5px;
-    margin-top: 8px;
-    background: var(--maroon); color: #f5d78e;
-    font-family: 'Libre Baskerville', serif;
-    font-size: 0.68rem; letter-spacing:1px;
-    padding: 5px 14px; border-radius: 20px;
-    text-decoration: none;
-    transition: background 0.2s, transform 0.2s;
+    display:inline-flex; align-items:center; gap:5px; margin-top:8px;
+    background:var(--maroon); color:#f5d78e;
+    font-family:'Libre Baskerville',serif; font-size:0.68rem; letter-spacing:1px;
+    padding:5px 14px; border-radius:20px; text-decoration:none;
+    transition:background 0.2s, transform 0.2s;
   }
-  .map-link:hover { background: #8b3030; transform:scale(1.03); }
+  .map-link:hover { background:#8b3030; transform:scale(1.03); }
   .map-link svg { width:12px; height:12px; fill:#f5d78e; flex-shrink:0; }
-
   .poem { font-size:0.82rem; color:var(--maroon); text-align:center; line-height:1.95; margin:8px 0; }
   .poem-sign { font-family:'Libre Baskerville',serif; font-size:0.88rem; color:var(--maroon); text-align:center; font-weight:bold; margin-top:6px; }
 
-  /* Nav bar */
+  /* Nav */
   .nav-bar { display:flex; justify-content:center; gap:6px; padding:13px 10px; background:var(--maroon); position:relative; z-index:2; }
-  .nav-btn {
-    background:transparent; border:1px solid rgba(255,255,255,0.32);
-    color:rgba(255,255,255,0.68); font-size:0.62rem; padding:5px 9px;
-    cursor:pointer; font-family:'Tiro Devanagari Hindi',serif;
-    border-radius:1px; transition:all 0.3s; position:relative; overflow:hidden;
-  }
-  .nav-btn:hover, .nav-btn.active { background:rgba(255,255,255,0.14); color:#fff; border-color:var(--gold); }
-  /* Active indicator dot */
-  .nav-btn.active::after {
-    content:''; position:absolute; bottom:3px; left:50%; transform:translateX(-50%);
-    width:4px; height:4px; background:var(--gold); border-radius:50%;
-  }
+  .nav-btn { background:transparent; border:1px solid rgba(255,255,255,0.32); color:rgba(255,255,255,0.68); font-size:0.62rem; padding:5px 9px; cursor:pointer; font-family:'Tiro Devanagari Hindi',serif; border-radius:1px; transition:all 0.3s; position:relative; overflow:hidden; }
+  .nav-btn:hover,.nav-btn.active { background:rgba(255,255,255,0.14); color:#fff; border-color:var(--gold); }
+  .nav-btn.active::after { content:''; position:absolute; bottom:3px; left:50%; transform:translateX(-50%); width:4px; height:4px; background:var(--gold); border-radius:50%; }
 
   /* Petals */
   .petal { position:fixed; border-radius:50% 0 50% 0; animation:fall linear infinite; pointer-events:none; z-index:0; }
-  @keyframes fall {
-    0% { transform:translateY(-20px) rotate(0deg); opacity:0.45; }
-    100% { transform:translateY(110vh) rotate(360deg); opacity:0; }
-  }
+  @keyframes fall { 0%{transform:translateY(-20px) rotate(0deg);opacity:0.45;} 100%{transform:translateY(110vh) rotate(360deg);opacity:0;} }
 
-  /* Reveal */
   .reveal { opacity:0; animation:revealUp 0.55s ease forwards; }
-  @keyframes revealUp {
-    from { opacity:0; transform:translateY(10px); }
-    to { opacity:1; transform:translateY(0); }
-  }
-
-  /* Auto-play indicator */
-  .auto-badge {
-    position:absolute; top:8px; right:10px;
-    font-size:0.52rem; color:var(--maroon); opacity:0.5;
-    font-family:'Libre Baskerville',serif; letter-spacing:1px;
-    cursor:pointer; z-index:20; user-select:none;
-  }
-  .auto-badge:hover { opacity:0.9; }
+  @keyframes revealUp { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
 </style>
 </head>
 <body>
-
 <script>
-  for(let i=0;i<10;i++){
-    const p=document.createElement('div');
-    p.className='petal';
-    p.style.cssText='left:'+Math.random()*100+'vw;animation-duration:'+(7+Math.random()*9)+'s;animation-delay:'+Math.random()*7+'s;width:'+(5+Math.random()*6)+'px;height:'+(5+Math.random()*6)+'px;background:rgba(107,31,31,0.1);';
-    document.body.appendChild(p);
-  }
+  for(let i=0;i<10;i++){const p=document.createElement('div');p.className='petal';p.style.cssText='left:'+Math.random()*100+'vw;animation-duration:'+(7+Math.random()*9)+'s;animation-delay:'+Math.random()*7+'s;width:'+(5+Math.random()*6)+'px;height:'+(5+Math.random()*6)+'px;background:rgba(107,31,31,0.1);';document.body.appendChild(p);}
 </script>
 
 <div class="card-wrapper">
   <div class="gold-frame">
-
-    <!-- Progress bar -->
     <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
 
     <div class="book-scene" id="bookScene">
       <div class="spine"></div>
 
-      <!-- PAGE 1: Cover -->
+      <!-- Tap hint (fades after 3.5s) -->
+      <div class="tap-hint">Tap to<br>pause</div>
+
+      <!-- Play/Pause button -->
+      <div class="playpause-btn" id="ppBtn" onclick="toggleAuto(event)">
+        <svg id="ppIcon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+      </div>
+
+      <!-- PAGE 1 -->
       <div class="page active" id="page1">
-        <div class="auto-badge" id="autoBadge" onclick="toggleAuto()">⏸ AUTO</div>
         <svg class="vine-svg vine-l" viewBox="0 0 32 260"><path d="M16 0 Q4 65 16 130 Q28 195 16 260" stroke="#6b1f1f" stroke-width="1.3" fill="none"/><circle cx="16" cy="52" r="4.5" fill="#6b1f1f" opacity="0.35"/><circle cx="6" cy="104" r="3.5" fill="#6b1f1f" opacity="0.28"/><circle cx="25" cy="156" r="4.5" fill="#6b1f1f" opacity="0.28"/><circle cx="8" cy="208" r="3.5" fill="#6b1f1f" opacity="0.22"/></svg>
         <svg class="vine-svg vine-r" viewBox="0 0 32 260"><path d="M16 0 Q4 65 16 130 Q28 195 16 260" stroke="#6b1f1f" stroke-width="1.3" fill="none"/><circle cx="16" cy="52" r="4.5" fill="#6b1f1f" opacity="0.35"/><circle cx="6" cy="104" r="3.5" fill="#6b1f1f" opacity="0.28"/><circle cx="25" cy="156" r="4.5" fill="#6b1f1f" opacity="0.28"/><circle cx="8" cy="208" r="3.5" fill="#6b1f1f" opacity="0.22"/></svg>
         <img class="ganesh-img reveal" src="data:image/png;base64,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" alt="Ganesh" style="animation-delay:0.05s"/>
@@ -251,19 +211,38 @@
         <div class="shloka reveal" style="animation-delay:0.15s">!! श्री गणेशाय नमः !!<br>वक्रतुण्ड महाकाय सूर्यकोटि समप्रभः।<br>निर्विघ्नं कुरु मे देव सर्व कार्येषु सर्वदा।।</div>
         <div class="shloka reveal" style="animation-delay:0.22s;font-style:normal;font-size:0.63rem;margin-top:2px;">Bless this union with eternal happiness</div>
         <div class="divider-line reveal" style="animation-delay:0.28s"><span>✦</span></div>
-        <div class="section-title reveal" style="animation-delay:0.34s">चि.</div>
-        <div class="name-main reveal" style="animation-delay:0.4s">नवीन पाठक</div>
-        <div class="name-eng reveal" style="animation-delay:0.44s">Naveen Pathak</div>
-        <div class="family-detail reveal" style="animation-delay:0.5s">सुपौत्र: श्रीमती माया देवी एवं स्व. श्री रघुनाथ प्रसाद पाठक<br><span style="font-size:0.62rem;opacity:0.72">Grandson of Late Shri Raghunath Prasad Pathak</span></div>
-        <div class="family-detail reveal" style="animation-delay:0.56s">सुपुत्र: श्रीमती ब्रजेश पाठक एवं श्री प्रकाश पाठक, निवासी–आगरा<br><span style="font-size:0.62rem;opacity:0.72">Son of Smt. Brajesh Pathak & Shri Prakash Pathak, Agra</span></div>
-        <div class="parinay-mid reveal" style="animation-delay:0.62s">❤ परिणय · Weds ❤</div>
-        <div class="section-title reveal" style="animation-delay:0.68s">सौ. काँ.</div>
-        <div class="name-main reveal" style="animation-delay:0.72s">गुमानिका भार्द्वाज</div>
-        <div class="name-eng reveal" style="animation-delay:0.76s">Gumanika Bhardwaj</div>
-        <div class="family-detail reveal" style="animation-delay:0.82s">सुपौत्री: श्रीमती प्रेमवती एवं स्व. श्री घनश्याम स्वरूप भार्द्वाज<br><span style="font-size:0.62rem;opacity:0.72">Granddaughter of Late Shri Ghanshyam Swaroop Bhardwaj</span></div>
-        <div class="family-detail reveal" style="animation-delay:0.88s">सुपुत्री: श्रीमती रमा भार्द्वाज एवं श्री अमित कुमार भार्द्वाज, निवासी–मथुरा<br><span style="font-size:0.62rem;opacity:0.72">Daughter of Smt. Rama Bhardwaj & Shri Amit Kumar Bhardwaj, Mathura</span></div>
-        <div class="divider-line reveal" style="animation-delay:0.94s;margin-top:10px;"><span>✦</span></div>
-        <div style="font-size:0.67rem;color:var(--maroon);text-align:center;opacity:0.72;margin-top:4px;" class="reveal" style="animation-delay:1s">के दाम्पत्य–सूत्र–बन्धन की मधुर बेला पर आपकी उपस्थिति सादर प्रार्थनीय है।<br><em>Your gracious presence is humbly requested at this auspicious occasion.</em></div>
+
+        <div class="section-title reveal" style="animation-delay:0.32s">चि.</div>
+        <div class="name-main reveal" style="animation-delay:0.37s">नवीन पाठक</div>
+        <div class="name-eng reveal" style="animation-delay:0.41s">Naveen Pathak</div>
+        <div class="family-detail reveal" style="animation-delay:0.46s">
+          सुपौत्र: श्रीमती माया देवी एवं स्व. श्री रघुनाथ प्रसाद पाठक<br>
+          <span style="font-size:0.62rem;opacity:0.75">Grandson of Smt. Maya Devi & Late Shri Raghunath Prasad Pathak</span>
+        </div>
+        <div class="family-detail reveal" style="animation-delay:0.52s">
+          सुपुत्र: श्रीमती ब्रजेश पाठक एवं श्री प्रकाश पाठक, निवासी–आगरा<br>
+          <span style="font-size:0.62rem;opacity:0.75">Son of Smt. Brajesh Pathak & Shri Prakash Pathak, Agra</span>
+        </div>
+
+        <div class="parinay-mid reveal" style="animation-delay:0.58s">❤ परिणय · Weds ❤</div>
+
+        <div class="section-title reveal" style="animation-delay:0.63s">सौ. काँ.</div>
+        <div class="name-main reveal" style="animation-delay:0.68s">गुमानिका भार्द्वाज</div>
+        <div class="name-eng reveal" style="animation-delay:0.72s">Gumanika Bhardwaj</div>
+        <div class="family-detail reveal" style="animation-delay:0.77s">
+          सुपौत्री: श्रीमती प्रेमवती एवं स्व. श्री घनश्याम स्वरूप भार्द्वाज<br>
+          <span style="font-size:0.62rem;opacity:0.75">Granddaughter of Smt. Premwati & Late Shri Ghanshyam Swaroop Bhardwaj</span>
+        </div>
+        <div class="family-detail reveal" style="animation-delay:0.83s">
+          सुपुत्री: श्रीमती रमा भार्द्वाज एवं श्री अमित कुमार भार्द्वाज, निवासी–मथुरा<br>
+          <span style="font-size:0.62rem;opacity:0.75">Daughter of Smt. Rama Bhardwaj & Shri Amit Kumar Bhardwaj, Mathura</span>
+        </div>
+
+        <div class="divider-line reveal" style="animation-delay:0.89s;margin-top:10px;"><span>✦</span></div>
+        <div style="font-size:0.67rem;color:var(--maroon);text-align:center;opacity:0.72;margin-top:4px;" class="reveal" style="animation-delay:0.94s">
+          के दाम्पत्य–सूत्र–बन्धन की मधुर बेला पर आपकी उपस्थिति सादर प्रार्थनीय है।<br>
+          <em>Your gracious presence is humbly requested at this auspicious occasion.</em>
+        </div>
       </div>
 
       <!-- PAGE 3: Events -->
@@ -293,8 +272,8 @@
           <div class="venue-label">विवाह स्थल | Venue</div>
           <div class="venue-name">D GRAND MARQUIS</div>
           <div class="venue-addr">फतेहाबाद रोड, आगरा | Fatehabad Road, Agra</div>
-          <a class="map-link" href="https://share.google/RLJIcQTuX9ypBQmES" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          <a class="map-link" href="https://maps.app.goo.gl/rDZLTHwk2qjv24rD6" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
             Click for Directions · दिशा-निर्देश
           </a>
         </div>
@@ -324,131 +303,117 @@
             📞 9412720690 &nbsp;|&nbsp; 9837156343 &nbsp;|&nbsp; 8445570801 &nbsp;|&nbsp; 8273173029<br>ग्राम–सदरवन, बिचपुरी, आगरा
           </div>
         </div>
-        <div style="margin-top:14px;background:var(--maroon);color:#f5d78e;padding:7px 22px;font-family:'Yatra One',cursive;font-size:0.95rem;letter-spacing:2px;border-radius:2px;" class="reveal" style="animation-delay:0.86s">
-          नवीन संग गुमानिका
-        </div>
+        <div style="margin-top:14px;background:var(--maroon);color:#f5d78e;padding:7px 22px;font-family:'Yatra One',cursive;font-size:0.95rem;letter-spacing:2px;border-radius:2px;" class="reveal" style="animation-delay:0.86s">नवीन संग गुमानिका</div>
       </div>
 
     </div><!-- end book-scene -->
 
-    <!-- Nav -->
     <nav class="nav-bar">
       <button class="nav-btn active" id="btn1" onclick="goPage(1,true)">मुखपृष्ठ<br><span style="font-size:0.52rem;">Cover</span></button>
       <button class="nav-btn" id="btn2" onclick="goPage(2,true)">परिचय<br><span style="font-size:0.52rem;">Couple</span></button>
       <button class="nav-btn" id="btn3" onclick="goPage(3,true)">कार्यक्रम<br><span style="font-size:0.52rem;">Events</span></button>
       <button class="nav-btn" id="btn4" onclick="goPage(4,true)">आशीर्वाद<br><span style="font-size:0.52rem;">Blessings</span></button>
     </nav>
-
   </div>
 </div>
 
 <script>
-  let current = 1;
-  let autoPlay = true;
-  let autoTimer = null;
-  let progressTimer = null;
-  const TOTAL = 4;
-  const DELAY = 10000;
+  let current = 1, autoPlay = true, autoTimer = null;
+  const TOTAL = 4, DELAY = 10000;
+
+  // Tap anywhere on book scene to toggle play/pause
+  document.getElementById('bookScene').addEventListener('click', function(e) {
+    // Don't toggle if user clicked a link or nav button
+    if (e.target.closest('a') || e.target.closest('.nav-btn')) return;
+    // Don't toggle if user clicked the play/pause button itself (it handles its own click)
+    if (e.target.closest('#ppBtn')) return;
+    toggleAuto(e);
+  });
 
   function goPage(n, userTriggered) {
     if (n === current) return;
     const oldPage = document.getElementById('page' + current);
     const newPage = document.getElementById('page' + n);
-
-    // Flip out old
     oldPage.classList.remove('active');
     oldPage.classList.add('flip-out');
-    setTimeout(() => { oldPage.classList.remove('flip-out'); }, 650);
-
-    // Flip in new
+    setTimeout(() => oldPage.classList.remove('flip-out'), 650);
     newPage.classList.add('active', 'flip-in');
-    setTimeout(() => { newPage.classList.remove('flip-in'); }, 650);
-
-    // Re-trigger reveal animations
+    setTimeout(() => newPage.classList.remove('flip-in'), 650);
     newPage.querySelectorAll('.reveal').forEach(el => {
-      el.style.animation = 'none';
-      el.offsetHeight;
-      el.style.animation = '';
+      el.style.animation = 'none'; el.offsetHeight; el.style.animation = '';
     });
-
-    // Update nav buttons
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('btn' + n).classList.add('active');
-
     current = n;
-
-    // If user manually clicked, pause auto for 20s then resume
-    if (userTriggered) {
-      pauseAuto();
-      setTimeout(() => {
-        if (!autoPlay) resumeAuto();
-      }, 20000);
-    }
-
-    startProgress();
+    if (userTriggered && autoPlay) startProgress();
   }
 
-  function nextPage() {
-    const next = current < TOTAL ? current + 1 : 1;
-    goPage(next, false);
-  }
+  function nextPage() { goPage(current < TOTAL ? current + 1 : 1, false); startProgress(); }
 
   function startProgress() {
     const fill = document.getElementById('progressFill');
     fill.style.transition = 'none';
     fill.style.width = '0%';
     fill.offsetHeight;
-    fill.style.transition = 'width ' + (DELAY/1000) + 's linear';
+    fill.classList.add('running');
     fill.style.width = '100%';
+  }
+
+  function stopProgress() {
+    const fill = document.getElementById('progressFill');
+    const computed = getComputedStyle(fill).width;
+    fill.classList.remove('running');
+    fill.style.transition = 'none';
+    fill.style.width = computed;
+    // Reset to 0 after stopping
+    setTimeout(() => { fill.style.width = '0%'; }, 50);
+  }
+
+  function setPauseIcon() {
+    document.getElementById('ppIcon').innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+  }
+  function setPlayIcon() {
+    document.getElementById('ppIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
   }
 
   function pauseAuto() {
     autoPlay = false;
     clearInterval(autoTimer);
-    const fill = document.getElementById('progressFill');
-    fill.style.transition = 'none';
-    fill.style.width = '0%';
-    const badge = document.getElementById('autoBadge');
-    if (badge) badge.textContent = '▶ AUTO';
+    stopProgress();
+    setPlayIcon();
   }
 
   function resumeAuto() {
     autoPlay = true;
-    const badge = document.getElementById('autoBadge');
-    if (badge) badge.textContent = '⏸ AUTO';
+    setPauseIcon();
     startProgress();
     autoTimer = setInterval(nextPage, DELAY);
   }
 
-  function toggleAuto() {
+  function toggleAuto(e) {
+    if (e) e.stopPropagation();
     if (autoPlay) pauseAuto();
     else resumeAuto();
   }
 
-  // Start auto-play
+  // Start
   resumeAuto();
 
   // Countdown
   function updateCountdown() {
-    const wedding = new Date('2026-04-26T11:00:00');
-    const diff = wedding - new Date();
+    const diff = new Date('2026-04-26T11:00:00') - new Date();
     if (diff <= 0) {
       const el = document.getElementById('countdown');
       if (el) el.innerHTML = '<div style="color:var(--maroon);font-size:0.88rem;text-align:center;">🎊 विवाह का शुभ दिन! | Wedding Day! 🎊</div>';
       return;
     }
-    const d = Math.floor(diff/86400000);
-    const h = Math.floor((diff%86400000)/3600000);
-    const m = Math.floor((diff%3600000)/60000);
-    const s = Math.floor((diff%60000)/1000);
-    const dEl = document.getElementById('cDays');
-    const hEl = document.getElementById('cHrs');
-    const mEl = document.getElementById('cMin');
-    const sEl = document.getElementById('cSec');
-    if (dEl) dEl.textContent = String(d).padStart(2,'0');
-    if (hEl) hEl.textContent = String(h).padStart(2,'0');
-    if (mEl) mEl.textContent = String(m).padStart(2,'0');
-    if (sEl) sEl.textContent = String(s).padStart(2,'0');
+    const pad = n => String(Math.floor(n)).padStart(2,'0');
+    const dEl=document.getElementById('cDays'), hEl=document.getElementById('cHrs'),
+          mEl=document.getElementById('cMin'),  sEl=document.getElementById('cSec');
+    if(dEl) dEl.textContent=pad(diff/86400000);
+    if(hEl) hEl.textContent=pad(diff%86400000/3600000);
+    if(mEl) mEl.textContent=pad(diff%3600000/60000);
+    if(sEl) sEl.textContent=pad(diff%60000/1000);
   }
   updateCountdown();
   setInterval(updateCountdown, 1000);
